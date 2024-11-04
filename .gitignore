@@ -1,0 +1,5 @@
+notebooks/images/
+notebooks/met_objects.csv
+notebooks/*.html
+
+.DS_Store
