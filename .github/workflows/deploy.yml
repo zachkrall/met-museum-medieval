@@ -52,7 +52,7 @@ jobs:
       - name: Build app
         working-directory: ./app
         run: |
-          BASE_URL="met-museum-medieval" pnpm build
+          BASE_URL="/met-museum-medieval/" pnpm build
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
