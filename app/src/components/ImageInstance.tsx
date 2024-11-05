@@ -25,7 +25,7 @@ async function createAtlas(
   const loadedImages = await Promise.all(
     images.map(({ objectID }) => {
       const img = new Image();
-      img.src = `/thumbnails/${objectID}.jpg`;
+      img.src = `./thumbnails/${objectID}.jpg`;
       return new Promise<HTMLImageElement>((resolve) => {
         img.onload = () => resolve(img);
       });
