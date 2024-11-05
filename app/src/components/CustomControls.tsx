@@ -30,8 +30,8 @@ export function CustomControls() {
 
         const dragSpeed = dragScale(camera.zoom);
   
-        const deltaX = (e.clientX - startMouse.current.x) * -dragSpeed;
-        const deltaY = (e.clientY - startMouse.current.y) * -dragSpeed;
+        const deltaX = (e.clientX - startMouse.current.x) * dragSpeed;
+        const deltaY = (e.clientY - startMouse.current.y) * dragSpeed;
   
         // Apply calculated offsets to the camera position
         camera.position.set(
