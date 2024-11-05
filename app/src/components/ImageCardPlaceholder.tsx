@@ -7,17 +7,15 @@ export const ImageCardPlaceholder = forwardRef<
   {
     scale?: number;
     z?: number;
-    x: number;
-    y: number;
     opacity?: number;
     meshProps?: ComponentProps<"mesh">;
   }
 >(function ImageCardPlaceholder(
-  { x, y, scale = 1.0, z = 0.0, opacity = 1.0, meshProps },
+  { scale = 1.0, z = 0.0, opacity = 1.0, meshProps },
   ref
 ) {
   return (
-    <mesh position={[x, y, z]} ref={ref} {...meshProps}>
+    <mesh position={[0, 0, z]} ref={ref} {...meshProps}>
       <planeGeometry args={[1 * scale, 1 * scale]} />
       <Edges color={"white"} opacity={opacity} />
       <meshBasicMaterial

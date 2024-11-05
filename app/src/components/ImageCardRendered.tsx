@@ -5,14 +5,10 @@ import { useEffect, useState } from "react";
 
 export function ImageCardRendered({
   src,
-  x,
-  y,
   z = 0,
   scale = 1,
 }: {
   src: string;
-  x: number;
-  y: number;
   z?: number;
   scale?: number;
 }) {
@@ -41,7 +37,7 @@ export function ImageCardRendered({
   }, [src]);
 
   return (
-    <mesh position={[x, y, z]}>
+    <mesh position={[0, 0, z]}>
       <planeGeometry args={[width * scale, height * scale, 1]} />
       <meshBasicMaterial map={texture} />
     </mesh>
