@@ -66,7 +66,7 @@ async function createAtlas(
   const uvOffsets: Array<[number, number]> = [];
   const scales: Array<[number, number]> = [];
 
- images.forEach((img, i) => {
+ images.forEach((_, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
     const baseX = col * thumbnailSize;
