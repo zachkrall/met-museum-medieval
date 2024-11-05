@@ -22,64 +22,82 @@ async function createAtlas(
   images: Array<ImageInstance>,
   thumbnailSize: number
 ) {
-  const loadedImages = await Promise.all(
-    images.map(({ objectID }) => {
-      const img = new Image();
-      img.src = `./thumbnails/${objectID}.jpg`;
-      return new Promise<HTMLImageElement>((resolve) => {
-        img.onload = () => resolve(img);
-      });
-    })
-  );
+  // const loadedImages = await Promise.all(
+  //   images.map(({ objectID }) => {
+  //     const img = new Image();
+  //     img.src = `./thumbnails/${objectID}.jpg`;
+  //     return new Promise<HTMLImageElement>((resolve) => {
+  //       img.onload = () => resolve(img);
+  //     });
+  //   })
+  // );
 
-  const numImages = loadedImages.length;
+  const numImages = images.length;
   const cols = Math.ceil(Math.sqrt(numImages));
   const rows = Math.ceil(numImages / cols);
-  const atlasWidth = cols * thumbnailSize;
-  const atlasHeight = rows * thumbnailSize;
+  // const atlasWidth = cols * thumbnailSize;
+  // const atlasHeight = rows * thumbnailSize;
 
-  const atlasCanvas = getOrCreateCanvas("image-atlas-canvas");
-  atlasCanvas.width = atlasWidth;
-  atlasCanvas.height = atlasHeight;
-  const context = atlasCanvas.getContext("2d")!;
+  // const atlasCanvas = getOrCreateCanvas("image-atlas-canvas");
+  // atlasCanvas.width = atlasWidth;
+  // atlasCanvas.height = atlasHeight;
+  // const context = atlasCanvas.getContext("2d")!;
 
-  context.fillStyle = "transparent";
-  context.fillRect(0, 0, atlasWidth, atlasHeight);
+  // context.fillStyle = "transparent";
+  // context.fillRect(0, 0, atlasWidth, atlasHeight);
+
+  const { image, atlasWidth, atlasHeight } =
+    await new Promise<{
+      image: HTMLImageElement;
+      atlasWidth: number;
+      atlasHeight: number;
+    }>((resolve) => {
+      // load atlas.png
+      const img = new Image();
+      img.src = "./atlas.png";
+      img.onload = () =>
+        resolve({
+          image: img,
+          atlasWidth: img.width,
+          atlasHeight: img.height,
+        });
+    });
 
   const uvOffsets: Array<[number, number]> = [];
   const scales: Array<[number, number]> = [];
 
-  loadedImages.forEach((img, i) => {
+ images.forEach((img, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
     const baseX = col * thumbnailSize;
     const baseY = (rows - 1 - row) * thumbnailSize;
 
     // Calculate dimensions maintaining aspect ratio
-    let targetWidth = thumbnailSize;
-    let targetHeight = thumbnailSize;
-    const aspectRatio = img.width / img.height;
+    // let targetWidth = thumbnailSize;
+    // let targetHeight = thumbnailSize;
+    // const aspectRatio = img.width / img.height;
+    // const aspectRatio = atlasWidth / atlasHeight;
 
-    if (aspectRatio > 1) {
-      // Image is wider than tall
-      targetHeight = thumbnailSize / aspectRatio;
-    } else {
-      // Image is taller than wide
-      targetWidth = thumbnailSize * aspectRatio;
-    }
+    // if (aspectRatio > 1) {
+    //   // Image is wider than tall
+    //   targetHeight = thumbnailSize / aspectRatio;
+    // } else {
+    //   // Image is taller than wide
+    //   targetWidth = thumbnailSize * aspectRatio;
+    // }
 
     // Calculate padding to center the image in the cell
-    const xPadding = (thumbnailSize - targetWidth) / 2;
-    const yPadding = (thumbnailSize - targetHeight) / 2;
+    // const xPadding = (thumbnailSize - targetWidth) / 2;
+    // const yPadding = (thumbnailSize - targetHeight) / 2;
 
     // Draw the image centered in its cell
-    context.drawImage(
-      img,
-      baseX + xPadding,
-      baseY + yPadding,
-      targetWidth,
-      targetHeight
-    );
+    // context.drawImage(
+    //   img,
+    //   baseX + xPadding,
+    //   baseY + yPadding,
+    //   targetWidth,
+    //   targetHeight
+    // );
 
     // Calculate UV coordinates and scales that match the padded area
     // const u = (baseX + xPadding) / atlasWidth;
@@ -99,6 +117,14 @@ async function createAtlas(
     // context.strokeStyle = 'rgba(255, 0, 0, 0.5)';
     // context.strokeRect(baseX, baseY, thumbnailSize, thumbnailSize);
   });
+
+  const atlasCanvas = getOrCreateCanvas("image-atlas-canvas");
+  atlasCanvas.width = atlasWidth;
+  atlasCanvas.height = atlasHeight;
+
+  const context = atlasCanvas.getContext("2d")!;
+
+  context.drawImage(image, 0, 0, atlasWidth, atlasHeight);
 
   const atlasTexture = new THREE.CanvasTexture(atlasCanvas);
   atlasTexture.wrapS = atlasTexture.wrapT = THREE.ClampToEdgeWrapping;
