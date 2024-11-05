@@ -1,13 +1,12 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { useGetObjects } from "../api/useGetObjects";
 import { OrthographicCamera } from "@react-three/drei";
-import { ImageCard } from "./ImageCard";
-import { ElementRef, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CustomControls } from "./CustomControls";
-import gsap from "gsap";
-import { useForceSimulation } from "../hooks/useForceSimulation";
 import { SelectedObject } from "./SelectedObject";
 import { AnimatePresence } from "framer-motion";
+import { ImageInstance } from "./ImageInstance";
+import { gsap } from "gsap";
 
 function PlotInner({
   objects,
@@ -18,50 +17,43 @@ function PlotInner({
 }) {
   const camera = useThree((state) => state.camera);
 
-  const positions = useForceSimulation(objects.data ?? [], 5);
-  // const positions = useRef<{ x: number; y: number }[]>(objects.data ?? []);
-
-  const refs = useRef<(ElementRef<"group"> | null)[]>([]);
-
-  useFrame(() => {
-    refs.current.forEach((ref, index) => {
-      if (ref) {
-        ref.position.x = positions.current[index].x ?? 0;
-        ref.position.y = positions.current[index].y ?? 0;
-      }
-    });
-  });
+  const positions = useRef<{ x: number; y: number }[]>(objects.data ?? []);
+  positions.current = objects.data ?? [];
 
   const lookAt = (index: number) => {
     const x = positions.current[index].x ?? 0;
     const y = positions.current[index].y ?? 0;
+    const z = 1;
 
     gsap.to(camera.position, {
       x,
       y,
-      z: 10,
+      z,
       duration: 1,
       ease: "power4.out",
+    });
+
+    gsap.to(camera, {
+      zoom: 70,
+      duration: 1,
+      ease: "power4.out",
+      onUpdate: () => camera.updateProjectionMatrix(),
     });
   };
 
   return (
     <>
-      <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={100} />
+      <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={70} />
 
-      {objects.data?.map((object, index) => (
-        <ImageCard
-          ref={(e) => (refs.current[index] = e)}
-          objectID={object.objectID}
-          index={index}
-          key={object.objectID + index}
-          onSelect={() => {
-            console.log("Selected", object.objectID);
-            lookAt(index);
-            setSelected(object.objectID);
+      {objects.data ? (
+        <ImageInstance
+          images={objects.data}
+          onSelect={(id) => {
+            lookAt(objects.data.findIndex((o) => o.objectID === id));
+            setSelected(id);
           }}
         />
-      ))}
+      ) : null}
 
       <CustomControls />
     </>
@@ -88,7 +80,11 @@ export function Plot({
 
       <AnimatePresence>
         {selected ? (
-          <SelectedObject key={'selected-object'} id={selected} onDismiss={() => setSelected(null)} />
+          <SelectedObject
+            key={"selected-object"}
+            id={selected}
+            onDismiss={() => setSelected(null)}
+          />
         ) : null}
       </AnimatePresence>
     </div>
