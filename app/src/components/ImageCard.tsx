@@ -61,7 +61,7 @@ export const ImageCard = forwardRef<
             >
               <ImageCardRendered
                 key={`${objectID + index}--image-card`}
-                src={`/thumbnails/${objectID}.jpg`}
+                src={`./thumbnails/${objectID}.jpg`}
                 z={scale > 1 ? 1 : 0}
                 scale={scale}
               />
