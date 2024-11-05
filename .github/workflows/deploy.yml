@@ -39,10 +39,10 @@ jobs:
 
       - name: Setup node
         uses: actions/setup-node@v4
-        working-directory: ./app
         with:
           node-version-file: './app/.nvmrc'
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         working-directory: ./app
