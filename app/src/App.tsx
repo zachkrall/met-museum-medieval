@@ -1,29 +1,27 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Plot } from "./components/Plot";
 import { useGetObjects } from "./api/useGetObjects";
-import { LoaderIcon } from "lucide-react";
+import { LoadingSpinner } from "./components/LoadingSpinner";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
 function Main() {
   const objects = useGetObjects();
+  const [isLoadingAtlas, setIsLoadingAtlas] = useState(true);
 
   if (objects.isLoading) {
     return (
-      <div
-        className={
-          "fixed inset-0 bg-black text-white grid place-content-center"
-        }
-      >
-        <div className={"flex flex-col gap-4"}>
-          <LoaderIcon className={"size-4 animate-spin opacity-50"} />
-          <div>Loading...</div>
-        </div>
-      </div>
+     <LoadingSpinner label="Loading embedding..."/>
     );
   }
 
-  return <Plot objects={objects} />;
+  return <>
+    <Plot objects={objects} onAtlasLoaded={() => setIsLoadingAtlas(false)} />
+    {isLoadingAtlas ? (
+      <LoadingSpinner label="Loading images..."/>
+    ) : null}
+  </>
 }
 
 function App() {

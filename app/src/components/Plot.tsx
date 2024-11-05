@@ -11,9 +11,11 @@ import { gsap } from "gsap";
 function PlotInner({
   objects,
   setSelected,
+  onAtlasLoaded,
 }: {
   objects: ReturnType<typeof useGetObjects>;
   setSelected: (id: string) => void;
+  onAtlasLoaded: () => void;
 }) {
   const camera = useThree((state) => state.camera);
 
@@ -52,6 +54,7 @@ function PlotInner({
             lookAt(objects.data.findIndex((o) => o.objectID === id));
             setSelected(id);
           }}
+          onAtlasLoaded={onAtlasLoaded}
         />
       ) : null}
 
@@ -62,15 +65,17 @@ function PlotInner({
 
 export function Plot({
   objects,
+  onAtlasLoaded,
 }: {
   objects: ReturnType<typeof useGetObjects>;
+  onAtlasLoaded: () => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
     <div className="fixed inset-0 size-screen">
       <Canvas className="bg-[black]">
-        <PlotInner objects={objects} setSelected={setSelected} />
+        <PlotInner objects={objects} setSelected={setSelected} onAtlasLoaded={onAtlasLoaded} />
       </Canvas>
 
       {/* vertical line in the middle of div */}

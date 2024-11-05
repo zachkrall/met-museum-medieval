@@ -46,27 +46,26 @@ async function createAtlas(
   // context.fillStyle = "transparent";
   // context.fillRect(0, 0, atlasWidth, atlasHeight);
 
-  const { image, atlasWidth, atlasHeight } =
-    await new Promise<{
-      image: HTMLImageElement;
-      atlasWidth: number;
-      atlasHeight: number;
-    }>((resolve) => {
-      // load atlas.png
-      const img = new Image();
-      img.src = "./atlas.png";
-      img.onload = () =>
-        resolve({
-          image: img,
-          atlasWidth: img.width,
-          atlasHeight: img.height,
-        });
-    });
+  const { image, atlasWidth, atlasHeight } = await new Promise<{
+    image: HTMLImageElement;
+    atlasWidth: number;
+    atlasHeight: number;
+  }>((resolve) => {
+    // load atlas.png
+    const img = new Image();
+    img.src = "./atlas.png";
+    img.onload = () =>
+      resolve({
+        image: img,
+        atlasWidth: img.width,
+        atlasHeight: img.height,
+      });
+  });
 
   const uvOffsets: Array<[number, number]> = [];
   const scales: Array<[number, number]> = [];
 
- images.forEach((_, i) => {
+  images.forEach((_, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
     const baseX = col * thumbnailSize;
@@ -146,9 +145,11 @@ async function createAtlas(
 export const ImageInstance = memo(function ImageInstance({
   images,
   onSelect,
+  onAtlasLoaded,
 }: {
   images: Array<ImageInstance>;
   onSelect: (objectID: string) => void;
+  onAtlasLoaded: () => void;
 }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const [atlasData, setAtlasData] = useState<Awaited<
@@ -159,8 +160,11 @@ export const ImageInstance = memo(function ImageInstance({
 
   // Create texture atlas and gather UV offsets
   useEffect(() => {
-    createAtlas(images, 50).then((data) => setAtlasData(data));
-  }, [images]);
+    createAtlas(images, 50).then((data) => {
+      setAtlasData(data);
+      onAtlasLoaded();
+    });
+  }, [images, onAtlasLoaded]);
 
   const material = useMemo(() => {
     if (!atlasData) return null;
