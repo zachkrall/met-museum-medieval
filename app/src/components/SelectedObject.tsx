@@ -31,7 +31,7 @@ export function SelectedObject({
           <LoadingSpinner label={"Loading object..."} />
         ) : (
           <div className={"max-w-xl flex flex-col items-center"}>
-            <div className={'relative size-96 [transform:translateZ(0)]'}>
+            <div className={'relative size-96 [transform:translateZ(0)] select-none'}>
               <LoadingSpinner label={''} showBackground={false}/>
               <div className={"absolute inset-0 bg-white/0"}>
                 <img

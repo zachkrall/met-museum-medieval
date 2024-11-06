@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+const config = require('tailwindcss/defaultConfig')
+
+/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -7,6 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        'sans': ["Inter", ...config.theme.fontFamily.sans],
         'display': ['"MedievalSharp"', 'sans-serif']
       }
     },

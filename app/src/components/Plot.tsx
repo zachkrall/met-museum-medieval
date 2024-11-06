@@ -7,6 +7,7 @@ import { SelectedObject } from "./SelectedObject";
 import { AnimatePresence } from "framer-motion";
 import { ImageInstance } from "./ImageInstance";
 import { gsap } from "gsap";
+import { MetLogo } from "../assets/met";
 
 function PlotInner({
   objects,
@@ -75,13 +76,37 @@ export function Plot({
   return (
     <div className="fixed inset-0 size-screen">
       <Canvas className="bg-[black]">
-        <PlotInner objects={objects} setSelected={setSelected} onAtlasLoaded={onAtlasLoaded} />
+        <PlotInner
+          objects={objects}
+          setSelected={setSelected}
+          onAtlasLoaded={onAtlasLoaded}
+        />
       </Canvas>
 
       {/* vertical line in the middle of div */}
       {/* <div className="absolute inset-y-0 left-1/2 w-px bg-[cyan]"></div> */}
       {/* horizontal line in the middle of div */}
       {/* <div className="absolute inset-x-0 top-1/2 h-px bg-[cyan]"></div> */}
+
+      <div className={"fixed top-0 left-0 p-4 w-full pointer-events-none"}>
+        <div
+          className={
+            "bg-black/90 backdrop-blur-sm w-full max-w-sm p-4 rounded-lg border border-white/10 pointer-events-auto"
+          }
+        >
+          <h1
+            className={
+              "font-sans border-b border-white/10 w-full pb-2 flex items-baseline gap-4"
+            }
+          >
+            <span>
+              <MetLogo className={"size-8"} />
+            </span>
+            <span className={'-translate-y-[1px] font-normal'}>The Medieval Department</span>
+          </h1>
+          <p className={"text-sm pt-2 opacity-80"}>This embedding plot was built with RezNet50 and Three.js</p>
+        </div>
+      </div>
 
       <AnimatePresence>
         {selected ? (
