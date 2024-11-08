@@ -1,95 +1,112 @@
 import { useThree } from "@react-three/fiber";
-import { scaleLinear } from "d3";
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { clamp } from "remeda";
 import { Vector2, Vector3 } from "three";
 
-const dragScale = scaleLinear().domain([20, 80]).range([0.09, 0.01]);
+import { DragGesture, WheelGesture, PinchGesture } from "@use-gesture/vanilla";
 
-export function CustomControls() {
-    const { camera, gl } = useThree();
-    const isDragging = useRef(false);
-    const startMouse = useRef(new Vector2());
-    const startCamera = useRef(new Vector3());
-  
-    // Start dragging
-    const handlePointerDown = useCallback(
-      (e: MouseEvent) => {
-        isDragging.current = true;
-        startMouse.current.set(e.clientX, e.clientY);
-        startCamera.current.copy(camera.position);
-        gl.domElement.style.cursor = "grabbing";
-      },
-      [camera.position, gl.domElement.style]
-    );
-  
-    // Handle dragging movement
-    const handlePointerMove = useCallback(
-      (e: MouseEvent) => {
-        if (!isDragging.current) return;
+export function CustomControls({
+  bounds,
+}: {
+  bounds: { minX: number; maxX: number; minY: number; maxY: number };
+}) {
+  const { camera, gl } = useThree();
+  const cameraRef = useRef(camera);
+  cameraRef.current = camera;
+  const startMouse = useRef(new Vector2());
+  const startCamera = useRef(new Vector3());
+  const startZoom = useRef(0);
 
-        const dragSpeed = dragScale(camera.zoom);
-  
-        const deltaX = (e.clientX - startMouse.current.x) * dragSpeed;
-        const deltaY = (e.clientY - startMouse.current.y) * dragSpeed;
-  
-        // Apply calculated offsets to the camera position
-        camera.position.set(
-          startCamera.current.x - deltaX,
-          startCamera.current.y + deltaY,
-          camera.position.z
-        );
-        camera.updateProjectionMatrix();
-      },
-      [camera]
-    );
-  
-    // End dragging
-    const handlePointerUp = useCallback(() => {
-      isDragging.current = false;
-      gl.domElement.style.cursor = "grab";
-    }, [gl]);
-  
-    // Handle zoom in and zoom out
-    const handleWheel = useCallback(
-      (e: WheelEvent) => {
-        const startingZoom = camera.zoom;
-        const zoomFactor = 0.01;
-  
-        camera.zoom = clamp(e.deltaY * -zoomFactor + startingZoom, {
+  // Register pointer events on the canvas itself for panning
+  useEffect(() => {
+    const canvas = gl.domElement;
+
+    if (canvas) {
+      canvas.style.touchAction = "manipulation";
+
+      const dragGesture = new DragGesture(
+        canvas,
+        ({ first, pinching, cancel, movement: [mx, my] }) => {
+          if (pinching) {
+            return cancel();
+          }
+
+          const cam = cameraRef.current;
+          const pos = cam.position;
+
+          if (first) {
+            startMouse.current.set(mx, my);
+            startCamera.current.copy(pos);
+          }
+
+          cam.position.set(
+            clamp(startCamera.current.x - mx * 0.02, {
+              min: bounds.minX * 0.9,
+              max: bounds.maxX * 0.9,
+            }),
+            clamp(startCamera.current.y + my * 0.02, {
+              min: bounds.minY * 0.9,
+              max: bounds.maxY * 0.9,
+            }),
+            pos.z
+          );
+        },
+        {
+          eventOptions: { passive: false },
+          preventScroll: true,
+        }
+      );
+
+      const wheelGesture = new WheelGesture(
+        canvas,
+        ({ pinching, movement: [_, my] }) => {
+          if (pinching) {
+            return;
+          }
+          const cam = cameraRef.current;
+          const startingZoom = cam.zoom;
+          const zoomFactor = 0.01;
+
+          cam.zoom = clamp(my * -zoomFactor + startingZoom, {
             min: 20,
-            max: 80
-        });
+            max: 80,
+          });
 
-        camera.updateProjectionMatrix();
-      },
-      [camera]
-    );
-  
-    // Register pointer events on the canvas itself for panning
-    useEffect(() => {
-      const canvas = gl.domElement;
-      canvas.addEventListener("pointerdown", handlePointerDown);
-      canvas.addEventListener("pointermove", handlePointerMove);
-      canvas.addEventListener("pointerup", handlePointerUp);
-      canvas.addEventListener("wheel", handleWheel);
-  
-      canvas.style.cursor = "grab";
-  
-      // Cleanup event listeners
+          cam.updateProjectionMatrix();
+        },
+        {
+          eventOptions: { passive: false },
+        }
+      );
+
+      const pinchGesture = new PinchGesture(
+        canvas,
+        ({ first, offset: [scale] }) => {
+          if (first) {
+            startZoom.current = cameraRef.current.zoom;
+          }
+
+          const cam = cameraRef.current;
+
+          cam.zoom = clamp(startZoom.current * scale, {
+            min: 20,
+            max: 80,
+          });
+
+          cam.updateProjectionMatrix();
+        },
+        {
+          eventOptions: { passive: false },
+        }
+      );
+
       return () => {
-        canvas.removeEventListener("pointerdown", handlePointerDown);
-        canvas.removeEventListener("pointermove", handlePointerMove);
-        canvas.removeEventListener("pointerup", handlePointerUp);
-        canvas.removeEventListener("wheel", handleWheel);
+        dragGesture.destroy();
+        wheelGesture.destroy();
+        pinchGesture.destroy();
       };
-    }, [
-      gl.domElement,
-      handlePointerDown,
-      handlePointerMove,
-      handlePointerUp,
-      handleWheel,
-    ]);
-  
-    return null;
-  }
+    }
+  }, [bounds.maxX, bounds.maxY, bounds.minX, bounds.minY, gl.domElement]);
+
+  return null;
+}

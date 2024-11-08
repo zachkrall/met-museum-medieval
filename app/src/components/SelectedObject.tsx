@@ -22,7 +22,7 @@ export function SelectedObject({
       />
 
       <motion.div
-        className={"fixed inset-0 place-content-center grid overflow-auto"}
+        className={"fixed inset-0 place-content-center grid overflow-auto p-4"}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -30,15 +30,17 @@ export function SelectedObject({
         {query.isLoading ? (
           <LoadingSpinner label={"Loading object..."} />
         ) : (
-          <div className={"max-w-xl flex flex-col items-center"}>
-            <div className={'relative size-96 [transform:translateZ(0)] select-none'}>
-              <LoadingSpinner label={''} showBackground={false}/>
-              <div className={"absolute inset-0 bg-white/0"}>
-                <img
-                  src={query.data?.primaryImage}
-                  className={"size-96 object-contain"}
-                />
-              </div>
+          <div className={"w-full max-w-xl flex flex-col items-center"}>
+            <div
+              className={
+                "shrink-0 grow-0 relative w-full max-w-96 h-0 pb-[100%] [transform:translateZ(0)] select-none"
+              }
+            >
+              <LoadingSpinner label={""} showBackground={false} />
+              <img
+                src={query.data?.primaryImage}
+                className={"absolute inset-0 size-full object-contain"}
+              />
             </div>
             <div className={"text-center py-4"}>
               <h1 className={"text-3xl font-display"}>

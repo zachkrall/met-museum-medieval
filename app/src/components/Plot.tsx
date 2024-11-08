@@ -7,7 +7,9 @@ import { SelectedObject } from "./SelectedObject";
 import { AnimatePresence } from "framer-motion";
 import { ImageInstance } from "./ImageInstance";
 import { gsap } from "gsap";
-import { MetLogo } from "../assets/met";
+import { cn } from "../utils/cn";
+import { useBoundingBox } from "../hooks/useBoundingBox";
+import { Title } from "./TItle";
 
 function PlotInner({
   objects,
@@ -18,6 +20,8 @@ function PlotInner({
   setSelected: (id: string) => void;
   onAtlasLoaded: () => void;
 }) {
+  const bounds = useBoundingBox(objects.data ?? []);
+
   const camera = useThree((state) => state.camera);
 
   const positions = useRef<{ x: number; y: number }[]>(objects.data ?? []);
@@ -59,7 +63,7 @@ function PlotInner({
         />
       ) : null}
 
-      <CustomControls />
+      <CustomControls bounds={bounds} />
     </>
   );
 }
@@ -74,8 +78,16 @@ export function Plot({
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
-    <div className="fixed inset-0 size-screen">
-      <Canvas className="bg-[black]">
+    <div
+      className={cn(
+        "fixed inset-0",
+        // a dotted background using radial gradient and background-size and repeat
+        "bg-black",
+        "bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px]",
+        "overflow-hidden"
+      )}
+    >
+      <Canvas className={'select-none overflow-hidden [&_*]:overflow-hidden'}>
         <PlotInner
           objects={objects}
           setSelected={setSelected}
@@ -83,30 +95,7 @@ export function Plot({
         />
       </Canvas>
 
-      {/* vertical line in the middle of div */}
-      {/* <div className="absolute inset-y-0 left-1/2 w-px bg-[cyan]"></div> */}
-      {/* horizontal line in the middle of div */}
-      {/* <div className="absolute inset-x-0 top-1/2 h-px bg-[cyan]"></div> */}
-
-      <div className={"fixed top-0 left-0 p-4 w-full pointer-events-none"}>
-        <div
-          className={
-            "bg-black/90 backdrop-blur-sm w-full max-w-sm p-4 rounded-lg border border-white/10 pointer-events-auto"
-          }
-        >
-          <h1
-            className={
-              "font-sans border-b border-white/10 w-full pb-2 flex items-baseline gap-4"
-            }
-          >
-            <span>
-              <MetLogo className={"size-8"} />
-            </span>
-            <span className={'-translate-y-[1px] font-normal'}>The Medieval Department</span>
-          </h1>
-          <p className={"text-sm pt-2 opacity-80"}>This embedding plot was built with RezNet50 and Three.js</p>
-        </div>
-      </div>
+      <Title/>
 
       <AnimatePresence>
         {selected ? (
