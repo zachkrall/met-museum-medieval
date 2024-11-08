@@ -33,13 +33,13 @@ export function SelectedObject({
           <div className={"w-full max-w-xl flex flex-col items-center"}>
             <div
               className={
-                "shrink-0 grow-0 relative w-full max-w-96 h-0 pb-[100%] [transform:translateZ(0)] select-none"
+                "shrink-0 grow-0 relative w-full max-w-96 [transform:translateZ(0)] select-none"
               }
             >
               <LoadingSpinner label={""} showBackground={false} />
               <img
                 src={query.data?.primaryImage}
-                className={"absolute inset-0 size-full object-contain"}
+                className={"relative w-full h-auto max-h-96 object-contain"}
               />
             </div>
             <div className={"text-center py-4"}>
