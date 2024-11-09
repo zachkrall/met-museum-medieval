@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 
 export const useGetObjectById = ({ id }: { id: string }) => {
   return useQuery({
@@ -7,12 +8,18 @@ export const useGetObjectById = ({ id }: { id: string }) => {
       const response = await fetch(
         `https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`
       );
-      return response.json() as Promise<{
-        title: string;
-        primaryImage: string;
-        medium: string;
-        objectDate: string;
-      }>;
+
+      const json = await response.json();
+
+      return z
+        .object({
+          title: z.string(),
+          primaryImage: z.string(),
+          medium: z.string(),
+          objectDate: z.string(),
+        })
+        .parse(json);
     },
+    retry: false,
   });
 };

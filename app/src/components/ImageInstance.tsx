@@ -158,7 +158,6 @@ export const ImageInstance = memo(function ImageInstance({
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Create texture atlas and gather UV offsets
   useEffect(() => {
     createAtlas(images, 50).then((data) => {
       setAtlasData(data);
@@ -230,7 +229,6 @@ export const ImageInstance = memo(function ImageInstance({
       instanceMatrix.setPosition(new THREE.Vector3(x, y, 0));
       mesh.setMatrixAt(i, instanceMatrix);
 
-      // Set each instance’s UV offset in the atlas
       const [u, v] = atlasData.uvOffsets[i];
       uvArray.push(u, v);
 
@@ -238,7 +236,6 @@ export const ImageInstance = memo(function ImageInstance({
       scaleArray.push(scaleU, scaleV);
     });
 
-    // Set UV offsets as an InstancedBufferAttribute
     mesh.geometry.setAttribute(
       "instanceUV",
       new THREE.InstancedBufferAttribute(new Float32Array(uvArray), 2)
@@ -273,12 +270,12 @@ export const ImageInstance = memo(function ImageInstance({
 
   useEffect(() => {
     if (material) {
-      material.uniforms.hoveredIndex.value = hoveredIndex ?? -1; // Update uniform with hovered index
+      material.uniforms.hoveredIndex.value = hoveredIndex ?? -1;
     }
   }, [hoveredIndex, material]);
 
   if (!atlasData || !material) {
-    return null; // Or a loading indicator
+    return null;
   }
 
   return (
@@ -302,7 +299,7 @@ export const ImageInstance = memo(function ImageInstance({
         }
       }}
     >
-      <planeGeometry args={[1, 1]} /> {/* Size of the geometry plane */}
+      <planeGeometry args={[1, 1]} />
       <primitive attach="material" object={material} />
     </instancedMesh>
   );
